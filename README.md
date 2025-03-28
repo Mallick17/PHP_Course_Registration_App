@@ -336,9 +336,13 @@ Below is the organized documentation of the steps to set up a PHP application (O
 
 7. **Test Application**
    - Access `http://<public-ip>` in a browser.
-   - Log in as admin:
+   - Login Details for Admin:
      - Username: `admin`.
      - Password: `Test@123`.
+   - Login Details for Student:
+     - Reg No.: `10806121`
+     - Password: `Test@123`
+     - Student Pincode for enroll Course Student: `822894`
 
 **Reason**:
 - Updating `config.php` with RDS credentials allows the PHP application to connect to the database. Setting permissions ensures Apache can read the configuration file. Creating the `onlinecourse` database on RDS prepares it for the application’s schema and data. Importing `onlinecourse.sql` sets up the necessary tables and initial data. Verifying the database ensures the import was successful. Restarting Apache applies the configuration changes. Testing the application confirms that the setup is complete and functional.
