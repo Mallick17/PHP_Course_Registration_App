@@ -366,4 +366,5 @@ Below is the organized documentation of the steps to set up a PHP application (O
 
 ---
 
-This documentation organizes the steps in the requested format, with reasons provided after each major step, aligning with your executed commands and handwritten notes. Let me know if you need further adjustments!
+![collage](https://github.com/user-attachments/assets/3fc96d3e-fc95-4aec-b99f-0f3cf1edbfa4)
+
