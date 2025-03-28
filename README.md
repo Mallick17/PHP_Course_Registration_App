@@ -372,3 +372,203 @@ Below is the organized documentation of the steps to set up a PHP application (O
 
 ![collage](https://github.com/user-attachments/assets/3fc96d3e-fc95-4aec-b99f-0f3cf1edbfa4)
 
+---
+
+### Step-by-Step Guide to Delete Resources Created on March 27, 2025
+
+#### Step 1: Identify Resources Created on March 27, 2025
+1. **Use AWS CloudTrail to Confirm Creation Dates (Optional)**
+   - Go to the AWS Management Console, search for "CloudTrail", and select it.
+   - In the left sidebar, click **Event history**.
+   - Filter events:
+     - **Time range**: Set to March 27, 2025 (e.g., 00:00 to 23:59 UTC).
+     - **Event name**: Look for events like `CreateVpc`, `RunInstances`, `CreateDBInstance`, `CreateSecurityGroup`, etc.
+   - Note the resources created, such as:
+     - VPC: `php-mallow-vpc`.
+     - EC2 Instance: `PHPServer`.
+     - RDS Instance: `db-php-mallow`.
+     - Security Groups: `web-sg`, `db-php-mallow-sg`.
+     - Subnets, Internet Gateway, Route Tables, etc.
+
+   **Alternative**: If you’re certain all resources in your setup were created on March 27, 2025, you can skip CloudTrail and proceed based on the resource names from your documentation.
+
+2. **List Resources in the Console**
+   - We’ll manually check each service for the resources you created, using the names from your setup.
+
+---
+
+#### Step 2: Delete the RDS Instance (`db-php-mallow`)
+1. **Navigate to RDS**
+   - In the AWS Management Console, search for "RDS" and select it.
+
+2. **Delete the RDS Instance**
+   - Select **Databases** from the left sidebar.
+   - Find `db-php-mallow` in the list.
+   - Select `db-php-mallow`, click **Actions** > **Delete**.
+   - **Settings**:
+     - **Create final snapshot?**: Uncheck (since this is a test setup and you don’t need a backup).
+     - **Acknowledge**: Check the box to confirm deletion.
+   - Click **Delete**.
+   - Wait for the RDS instance to be deleted (this may take a few minutes).
+
+3. **Delete the DB Subnet Group**
+   - In the RDS dashboard, select **Subnet groups** from the left sidebar.
+   - Find `php-mallow-db-subnet-group`.
+   - Select it, click **Delete**, and confirm.
+
+**Reason**:
+- The RDS instance (`db-php-mallow`) and its associated DB subnet group (`php-mallow-db-subnet-group`) were created on March 27, 2025, as part of your setup. Deleting them stops the RDS running cost (approximately $0.021 per hour for `db.t3.micro` in `ap-south-1`, or $15.12 per month) and removes associated resources.
+
+---
+
+#### Step 3: Terminate the EC2 Instance (`PHPServer`)
+1. **Navigate to EC2**
+   - In the AWS Management Console, search for "EC2" and select it.
+
+2. **Terminate the EC2 Instance**
+   - Select **Instances** from the left sidebar.
+   - Find `PHPServer` in the list.
+   - Select `PHPServer`, click **Instance state** > **Terminate instance**.
+   - Confirm by clicking **Terminate**.
+   - Wait for the instance to be terminated (status will change to **Terminated**).
+
+**Reason**:
+- The EC2 instance `PHPServer` was created on March 27, 2025, to host your PHP application. Terminating it stops the instance running cost (approximately $0.0116 per hour for `t2.micro` in `ap-south-1`, or $8.35 per month) and removes the instance from your account.
+
+---
+
+#### Step 4: Delete Security Groups (`web-sg` and `db-php-mallow-sg`)
+1. **Navigate to Security Groups**
+   - In the EC2 Dashboard, select **Security Groups** from the left sidebar (or go to the VPC dashboard and select **Security Groups**).
+
+2. **Delete `web-sg`**
+   - Find `web-sg` (created for the EC2 instance).
+   - Select it, click **Actions** > **Delete security group**.
+   - If it’s not deletable due to dependencies, ensure the EC2 instance `PHPServer` is terminated (Step 3). Then retry.
+   - Confirm by clicking **Delete**.
+
+3. **Delete `db-php-mallow-sg`**
+   - Find `db-php-mallow-sg` (created for the RDS instance).
+   - Select it, click **Actions** > **Delete security group**.
+   - If it’s not deletable due to dependencies, ensure the RDS instance `db-php-mallow` is deleted (Step 2). Then retry.
+   - Confirm by clicking **Delete**.
+
+**Reason**:
+- The security groups `web-sg` and `db-php-mallow-sg` were created on March 27, 2025, to control traffic to the EC2 instance and RDS instance, respectively. Deleting them removes unused resources and cleans up your account.
+
+---
+
+#### Step 5: Delete the VPC (`php-mallow-vpc`) and Associated Resources
+To delete the VPC, you must first delete its dependencies (subnets, route tables, Internet Gateway, etc.).
+
+1. **Delete Subnets**
+   - In the VPC dashboard, select **Subnets** from the left sidebar.
+   - Select the following subnets (created on March 27, 2025):
+     - `Public-1a` (`10.0.1.0/24`).
+     - `Public-1b` (`10.0.2.0/24`).
+     - `Private-1a` (`10.0.3.0/24`).
+     - `Private-1b` (`10.0.4.0/24`).
+   - For each subnet, select it, click **Actions** > **Delete subnet**, and confirm.
+   - If a subnet cannot be deleted due to dependencies (e.g., EC2 instance or RDS instance), ensure those resources are deleted (Steps 2 and 3).
+
+2. **Delete Route Tables**
+   - In the VPC dashboard, select **Route Tables** from the left sidebar.
+   - Find `php-mallow-public-RT` and `php-mallow-private-RT`.
+   - For each route table:
+     - Select it, click **Actions** > **Delete route table**.
+     - Confirm by clicking **Delete**.
+   - Note: The default route table for the VPC cannot be deleted until the VPC is deleted.
+
+3. **Detach and Delete the Internet Gateway**
+   - In the VPC dashboard, select **Internet Gateways** from the left sidebar.
+   - Find `php-mallow-IGW`.
+   - Select it, click **Actions** > **Detach from VPC**, and confirm.
+   - After detaching, select `php-mallow-IGW` again, click **Actions** > **Delete internet gateway**, and confirm.
+
+4. **Delete the VPC**
+   - In the VPC dashboard, select **Your VPCs** from the left sidebar.
+   - Find `php-mallow-vpc`.
+   - Select it, click **Actions** > **Delete VPC**.
+   - Confirm by clicking **Delete**.
+   - This will also delete the default route table and any remaining default resources associated with the VPC.
+
+**Reason**:
+- The VPC (`php-mallow-vpc`), subnets, route tables, and Internet Gateway were created on March 27, 2025, as part of your network setup. Deleting them removes all network resources and ensures no residual costs (e.g., from orphaned resources). You must delete dependencies (subnets, route tables, Internet Gateway) before deleting the VPC.
+
+---
+
+#### Step 6: Verify Deletion of NAT Gateway and Elastic IP
+- In your previous step, you already deleted the NAT Gateway (`php-mallow-NATGW`) and released its associated Elastic IP. Let’s confirm they are removed:
+  - **NAT Gateway**:
+    - Go to **VPC** > **NAT Gateways**.
+    - Ensure `php-mallow-NATGW` is not listed (or shows as **Deleted**).
+  - **Elastic IP**:
+    - Go to **EC2** > **Elastic IPs**.
+    - Ensure the Elastic IP previously associated with `php-mallow-NATGW` is not listed.
+
+**Reason**:
+- The NAT Gateway and its Elastic IP were created on March 27, 2025, but you already deleted them to reduce costs. Verifying their deletion ensures no residual charges remain.
+
+---
+
+#### Step 7: Delete the Key Pair (`mykey`)
+1. **Navigate to Key Pairs**
+   - In the EC2 Dashboard, select **Key Pairs** from the left sidebar.
+
+2. **Delete the Key Pair**
+   - Find `mykey` (created for the EC2 instance `PHPServer`).
+   - Select it, click **Actions** > **Delete**.
+   - Confirm by clicking **Delete**.
+
+**Reason**:
+- The key pair `mykey` was created on March 27, 2025, to SSH into the EC2 instance. Since the instance is terminated, the key pair is no longer needed and can be deleted to clean up your account.
+
+---
+
+#### Step 8: Verify Deletion and Check for Residual Costs
+1. **Verify Resource Deletion**
+   - **RDS**: Ensure `db-php-mallow` and `php-mallow-db-subnet-group` are deleted.
+   - **EC2**: Ensure `PHPServer` is terminated and `web-sg` is deleted.
+   - **VPC**: Ensure `php-mallow-vpc`, subnets, route tables, and `php-mallow-IGW` are deleted.
+   - **Security Groups**: Ensure `db-php-mallow-sg` is deleted.
+   - **Key Pairs**: Ensure `mykey` is deleted.
+
+2. **Check Billing Dashboard**
+   - Go to the AWS Billing and Cost Management Dashboard.
+   - Under **Bills**, check for charges related to EC2, RDS, VPC, or Elastic IPs.
+   - Ensure no charges are accruing for the deleted resources.
+
+**Reason**:
+- Verifying deletion ensures all resources created on March 27, 2025, are removed, stopping all associated costs. Checking the billing dashboard confirms that no residual charges remain.
+
+---
+
+### Impact on Your Setup
+- **PHP Application**: The PHP application hosted on `PHPServer` is no longer accessible because the EC2 instance is terminated.
+- **RDS Database**: The RDS instance `db-php-mallow` and its data are deleted. If you did not create a final snapshot, the data cannot be recovered.
+- **Network**: The VPC and all associated network resources (subnets, route tables, Internet Gateway) are deleted, leaving no network infrastructure in your account.
+- **Cost Savings**:
+  - **EC2 Instance (`t2.micro`)**: Saved $8.35 per month ($0.0116 per hour).
+  - **RDS Instance (`db.t3.micro`)**: Saved $15.12 per month ($0.021 per hour).
+  - **NAT Gateway and Elastic IP**: Already deleted, saving $36 per month (as calculated previously).
+  - **Total Savings**: Approximately $59.47 per month (plus any minor charges for data transfer or storage).
+
+---
+
+### Additional Notes
+- **CloudTrail for Precision**: If you have other resources in your account and are unsure about their creation dates, CloudTrail is the most reliable way to identify resources created on March 27, 2025. Alternatively, you can use the AWS CLI:
+  ```bash
+  aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId, LaunchTime]' --output table
+  aws rds describe-db-instances --query 'DBInstances[*].[DBInstanceIdentifier, DBInstanceStatus, DBCreationDateTime]' --output table
+  ```
+- **Snapshots or Backups**: If you need to recover the RDS data later, you should have created a final snapshot before deletion. Since this is a test setup, we skipped this step.
+- **Other Regions**: Ensure you’re in the correct region (`ap-south-1`). If you created resources in other regions, repeat the process in those regions.
+
+---
+
+### Summary
+- **Resources Deleted**: EC2 instance (`PHPServer`), RDS instance (`db-php-mallow`), DB subnet group (`php-mallow-db-subnet-group`), security groups (`web-sg`, `db-php-mallow-sg`), VPC (`php-mallow-vpc`), subnets, route tables, Internet Gateway (`php-mallow-IGW`), and key pair (`mykey`). The NAT Gateway and its Elastic IP were already deleted.
+- **Cost Savings**: Approximately $59.47 per month by deleting all resources.
+- **Impact**: Your entire setup (PHP application, RDS database, and network infrastructure) is removed, and no further charges will accrue.
+
+All resources created on March 27, 2025, as part of your setup have been deleted. Let me know if you need assistance with recreating any resources or further cleanup!
